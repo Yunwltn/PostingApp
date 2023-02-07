@@ -27,6 +27,7 @@ public class AddActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add);
 
         getSupportActionBar().setTitle("포스팅 생성");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         editTitle = findViewById(R.id.editTitle);
         editBody = findViewById(R.id.editBody);
@@ -55,7 +56,8 @@ public class AddActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void SavePosting() {
+    // 포스팅 저장할 메소드 만들어주기
+    void SavePosting() {
         String title = editTitle.getText().toString();
         String body = editBody.getText().toString();
 
@@ -74,5 +76,11 @@ public class AddActivity extends AppCompatActivity {
         // 창 종료 메인으로 돌아가기
         Toast.makeText(AddActivity.this, "포스팅이 저장되었습니다", Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

@@ -76,8 +76,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AddActivity.class);
-                launcher.launch(intent);
+                startAddActivity();
             }
         });
 
@@ -134,10 +133,14 @@ public class MainActivity extends AppCompatActivity {
         int itemId = item.getItemId();
 
         if (itemId == R.id.menuAdd) {
-            // Add 실행하는 코드
-            Intent intent = new Intent(MainActivity.this, AddActivity.class);
-            launcher.launch(intent);
+            startAddActivity();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // AddActivity 실행할 함수 만들기
+    void startAddActivity() {
+        Intent intent = new Intent(MainActivity.this, AddActivity.class);
+        launcher.launch(intent);
     }
 }
