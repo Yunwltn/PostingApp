@@ -1,11 +1,20 @@
 package com.yunwltn98.postingapp;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -35,6 +44,18 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Posting> postingList = new ArrayList<>();
     final String URL = "https://block1-image-test.s3.ap-northeast-2.amazonaws.com";
 
+    public ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            // 액티비티 실행한 후 이 액티비티로 돌아왔을때 할일
+            if (result.getResultCode() == AddActivity.SAVE) {
+                Posting posting = (Posting) result.getData().getSerializableExtra("posting");
+                postingList.add(0, posting);
+                adapter.notifyDataSetChanged();
+            }
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,12 +73,21 @@ public class MainActivity extends AppCompatActivity {
                 new DividerItemDecoration(getApplicationContext(),new LinearLayoutManager(this).getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
 
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AddActivity.class);
+                launcher.launch(intent);
+            }
+        });
+
         // 네트워크 통신해서 데이터 가져오기
         RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET, URL + "/posting.json", null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                progressBar.setVisibility(View.GONE);
                 // 리스트 데이터 가져오기
                 try {
                     JSONArray responseData = response.getJSONArray("data");
@@ -84,10 +114,30 @@ public class MainActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        progressBar.setVisibility(View.GONE);
                     }
                 }
         );
+        // 네트워크 호출할때 프로그래스바 보이게한다
+        progressBar.setVisibility(View.VISIBLE);
         queue.add(request);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.menuAdd) {
+            // Add 실행하는 코드
+            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            launcher.launch(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
